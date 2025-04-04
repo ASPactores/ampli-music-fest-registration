@@ -2,11 +2,18 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from mangum import Mangum
 
+from models.model import init_db
 from auth.auth_routes import router as auth_routes
+
+async def lifespan(app: FastAPI):
+    await init_db()
+    yield
 
 app = FastAPI(
     root_path="/api/v1",
+    lifespan=lifespan
 )
+
 origins = ['*']
 app.add_middleware(
     CORSMiddleware,
