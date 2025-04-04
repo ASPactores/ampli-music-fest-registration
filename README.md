@@ -50,5 +50,5 @@ git clone https://github.com/ASPactores/ampli-music-fest-registration.git
      ```
 4. Run fastapi server
    ```bash
-   fastapi dev main.py
+   ENV=development fastapi dev main.py
    ```
