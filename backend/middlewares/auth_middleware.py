@@ -37,7 +37,7 @@ class AuthMiddleware:
                     # Set new cookies
                     response.set_cookie(
                         key="access_token",
-                        value=f"Bearer {access_token}",
+                        value=access_token,
                         httponly=True,
                         expires=new_auth.session.expires_in,
                     )

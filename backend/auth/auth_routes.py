@@ -28,7 +28,7 @@ def login(response: Response, email: str, password: str):
         response = RedirectResponse(url="/", status_code=302)
         response.set_cookie(
             key="access_token",
-            value=f"Bearer {access_token}",
+            value=access_token,
             expires=auth_response.session.expires_in,
             httponly=True,
         )
