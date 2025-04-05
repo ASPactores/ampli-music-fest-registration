@@ -1,11 +1,10 @@
-from fastapi import Depends, FastAPI
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from mangum import Mangum
 
 from models.model import init_db
 from auth.auth_routes import router as auth_routes
 from middlewares.auth_middleware import AuthMiddleware
-from middlewares.validate_token import validate_auth
 
 from routes.retrieve_attendee import router as retrieve_attendee_routes
 
@@ -27,13 +26,14 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.add_middleware(AuthMiddleware)
 app.include_router(
     auth_routes,
 )
 app.include_router(
     retrieve_attendee_routes,
-    dependencies=[Depends(validate_auth)]
 )
+
 
 @app.get("/")
 def hello_world():
