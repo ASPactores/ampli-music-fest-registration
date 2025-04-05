@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict, field_validator
+from pydantic import BaseModel, ConfigDict
 from typing import List, Optional
 import uuid
 
@@ -12,7 +12,33 @@ class AttendeeSchema(BaseModel):
     checked_in_at: Optional[str] = None
     
     model_config = ConfigDict(from_attributes=True)
+    
+class RegistrationSchema(BaseModel):
+    id: uuid.UUID
+    attendee_id: uuid.UUID
+    up_student: Optional[bool] = None
+    year_degree: Optional[str] = None
+    affiliation: str
+    hear_about_event: Optional[str] = None
+    follow_guidelines: Optional[bool] = None
+    allow_updates: Optional[bool] = None
+    
+    model_config = ConfigDict(from_attributes=True)
 
+class RegistrationFormSchema(BaseModel):
+    id: uuid.UUID
+    full_name: str
+    email: str
+    phone_number: Optional[str] = None
+    up_student: Optional[bool] = None
+    year_degree: Optional[str] = None
+    affiliation: str
+    hear_about_event: Optional[str] = None
+    follow_guidelines: Optional[bool] = None
+    allow_updates: Optional[bool] = None
+    
+    model_config = ConfigDict(from_attributes=True)
+    
 
 class PaginationLinks(BaseModel):
     first: Optional[str] = None
