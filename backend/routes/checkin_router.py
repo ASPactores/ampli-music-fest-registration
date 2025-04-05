@@ -4,7 +4,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload
 from typing import Annotated
 from database.config import get_db
-from models.model import AttendeeDetails, RegistrationStatistics
+from models.model import AttendeeDetails
 from models.schema import PaginatedAttendeesResponse, CheckedInAttendeeResponse
 from utils.pagination import create_pagination_metadata
 from utils.format_attendee import format_attendees
