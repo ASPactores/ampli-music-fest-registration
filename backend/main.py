@@ -6,7 +6,8 @@ from models.model import init_db
 from auth.auth_routes import router as auth_routes
 from middlewares.auth_middleware import AuthMiddleware
 
-from routes.retrieve_attendee import router as retrieve_attendee_routes
+from routes.attendee_router import router as retrieve_attendee_routes
+from routes.checkin_router import router as checkin_routes
 
 
 async def lifespan(app: FastAPI):
@@ -32,6 +33,9 @@ app.include_router(
 )
 app.include_router(
     retrieve_attendee_routes,
+)
+app.include_router(
+    checkin_routes,
 )
 
 
