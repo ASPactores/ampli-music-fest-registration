@@ -1,22 +1,33 @@
 from fastapi import Request
 from fastapi.responses import RedirectResponse
-from typing import Callable
+from starlette.middleware.base import BaseHTTPMiddleware
 from auth.supabase import supabase
+from urllib.parse import urljoin
 
-class AuthMiddleware:
-    def __init__(self, auto_error: bool = True):
-        self.auto_error = auto_error
-        
-    async def __call__(self, request: Request, call_next: Callable):
+exclude_path = [
+    "/docs",
+    "/api/v1/auth",
+    "/api/v1/openapi.json",
+]
+
+class AuthMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
         """
         Middleware to check if the user is authenticated
         """
         try:
+            if request.url.path.startswith(tuple(exclude_path)) or request.url.path == "/":
+                return await call_next(request)
+
+            base_url = str(request.base_url).rstrip('/')
+            login_url = urljoin(base_url, "/login")
+
+
             access_token = request.cookies.get("access_token")
             refresh_token = request.cookies.get("refresh_token")
             
             if access_token is None or refresh_token is None:
-                return RedirectResponse(url="/login", status_code=302)
+                return RedirectResponse(url=login_url, status_code=302)
             
             try:
                 supabase.auth.get_user(access_token)
@@ -31,10 +42,8 @@ class AuthMiddleware:
                     access_token = new_auth.session.access_token
                     refresh_token = new_auth.session.refresh_token
                     
-                    # Create response with the original request
                     response = await call_next(request)
                     
-                    # Set new cookies
                     response.set_cookie(
                         key="access_token",
                         value=access_token,
@@ -49,6 +58,6 @@ class AuthMiddleware:
                     
                     return response
                 except Exception:
-                    return RedirectResponse(url="/login", status_code=302)
+                    return RedirectResponse(url=login_url, status_code=302)
         except Exception:
-            return RedirectResponse(url="/login", status_code=302)
+            return RedirectResponse(url=login_url, status_code=302)
