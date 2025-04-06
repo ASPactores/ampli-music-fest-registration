@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from typing import Annotated
 from database.config import get_db
 from models.model import AttendeeDetails, RegistrationStatistics
-from models.schema import RegistrationSchema, RegistrationFormSchema
+from models.schema import RegistrationFormSchema
 
 
 from models.schema import PaginatedAttendeesResponse
