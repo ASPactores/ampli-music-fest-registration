@@ -1,4 +1,3 @@
-import "./App.css";
 import main_logo from "./assets/sari_sari_main_logo.svg";
 
 function App() {

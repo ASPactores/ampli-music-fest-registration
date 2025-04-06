@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router";
-import { BottomNavbar } from "@/components/BottomNavbar";
 
 const NotFound = () => {
   const navigate = useNavigate();
@@ -13,7 +12,6 @@ const NotFound = () => {
         <p className="text-base md:text-lg text-gray-700 mb-8">
           The page you’re looking for doesn’t exist or has been moved.
         </p>
-        <BottomNavbar />
         <Button
           variant="outline"
           className="bg-black text-white hover:bg-white hover:text-black hover:cursor-pointer transition"
