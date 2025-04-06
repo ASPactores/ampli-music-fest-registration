@@ -1,8 +1,7 @@
 from fastapi import Request
-from fastapi.responses import RedirectResponse, JSONResponse
+from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 from auth.supabase import supabase
-from urllib.parse import urljoin
 
 exclude_path = [
     "/docs",
