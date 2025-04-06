@@ -42,6 +42,7 @@ def login(response: Response, email: str, password: str):
             key="uid",
             value=uid,
             httponly=False,
+            expires=auth_response.session.expires_in,
         )
 
         return response
@@ -62,6 +63,7 @@ def logout(response: Response, request: Request):
         response = RedirectResponse(url="/login", status_code=302)
         response.delete_cookie(key="access_token")
         response.delete_cookie(key="refresh_token")
+        response.delete_cookie(key="uid")
         return response
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
