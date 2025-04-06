@@ -8,6 +8,7 @@ exclude_path = [
     "/docs",
     "/api/v1/auth",
     "/api/v1/openapi.json",
+    "/api/v1/"
 ]
 
 class AuthMiddleware(BaseHTTPMiddleware):
@@ -41,6 +42,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
                     
                     access_token = new_auth.session.access_token
                     refresh_token = new_auth.session.refresh_token
+                    uid = new_auth.user.id
                     
                     response = await call_next(request)
                     
@@ -54,6 +56,11 @@ class AuthMiddleware(BaseHTTPMiddleware):
                         key="refresh_token",
                         value=refresh_token,
                         httponly=True,
+                    )
+                    response.set_cookie(
+                        key="uid",
+                        value=uid,
+                        httponly=False,
                     )
                     
                     return response

@@ -24,7 +24,8 @@ def login(response: Response, email: str, password: str):
 
         access_token = auth_response.session.access_token
         refresh_token = auth_response.session.refresh_token
-
+        uid = auth_response.user.id
+        
         response = RedirectResponse(url="/", status_code=302)
         response.set_cookie(
             key="access_token",
@@ -36,6 +37,11 @@ def login(response: Response, email: str, password: str):
             key="refresh_token",
             value=refresh_token,
             httponly=True,
+        )
+        response.set_cookie(
+            key="uid",
+            value=uid,
+            httponly=False,
         )
 
         return response
