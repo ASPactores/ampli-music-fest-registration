@@ -2,7 +2,8 @@ import type React from "react";
 import { useState, useEffect } from "react";
 import { QrCode, FileText, User, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Link, useLocation } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
+import { useLogout } from "@/hooks/useLogout";
 
 interface NavItemProps {
   icon: React.ReactNode;
@@ -47,6 +48,12 @@ const NavItem = ({ icon, label, href, isActive, onClick }: NavItemProps) => {
 export function BottomNavbar() {
   const [activeIndex, setActiveIndex] = useState(0);
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    useLogout(); // Call the logout hook
+    navigate("/login"); // Redirect to the login page
+  };
 
   const navItems = [
     {
@@ -67,7 +74,8 @@ export function BottomNavbar() {
     {
       icon: <LogOut className="h-5 w-5 sm:h-6 sm:w-6" />,
       label: "Sign Out",
-      href: "/logout",
+      href: "#", // Prevent navigation since logout is handled manually
+      onClick: handleLogout,
     },
   ];
 
@@ -90,7 +98,9 @@ export function BottomNavbar() {
             label={item.label}
             href={item.href}
             isActive={activeIndex === index}
-            onClick={() => setActiveIndex(index)}
+            onClick={() =>
+              item.label === "Sign Out" ? handleLogout() : setActiveIndex(index)
+            }
           />
         ))}
       </div>
