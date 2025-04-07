@@ -34,6 +34,7 @@ provider:
     SUPABASE_ANON_KEY: ${env:SUPABASE_ANON_KEY}
     DATABASE_CONNECTION_STRING: ${env:DATABASE_CONNECTION_STRING}
     LOGIN_CALLBACK_URL: ${env:LOGIN_CALLBACK_URL}
+    FRONTEND_URL: ${env:FRONTEND_URL}
 
 functions:
   app:
@@ -43,9 +44,34 @@ functions:
       - Ref: PythonRequirementsLambdaLayer
     events:
       - http:
+          path: /
+          method: get
+          cors: true
+      - http:
           path: /{proxy+}
           method: any
-          cors: true
+          cors:
+            origin: "http://localhost:5173"
+            headers:
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+              - X-Forwarded-For
+              - X-Forwarded-Port
+              - Accept
+              - Origin
+              - Referer
+              - User-Agent
+            allowCredentials: true
+            allowMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+              - PATCH
 
 package:
   individually: false
@@ -57,14 +83,27 @@ package:
     - models/**
     - routes/**
     - utils/**
-    - requirements.txt
+
   exclude:
+    - requirements.txt
     - "**/__pycache__/**"
+    - "**/*.pyc"
     - .venv/**
     - node_modules/**
     - uv.lock
-    - "*.pyc"
     - .DS_Store
+    - .serverless/**
+    - .idea/**
+    - venv/**
+    - package.json
+    - package-lock.json
+    - Pipfile
+    - Pipfile.lock
+    - log.txt
+    - README.md
+    - ruff.toml
+    - scripts/**
+    - resources/**
 
 plugins:
   - serverless-python-requirements
