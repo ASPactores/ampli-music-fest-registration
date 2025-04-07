@@ -25,5 +25,5 @@ export default function ProtectRoute({
     return <Navigate to="/login" replace />;
   }
 
-  return <Navigate to="/admin" replace />;
+  return <Navigate to="/admin/scan" replace />;
 }
