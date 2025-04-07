@@ -73,6 +73,6 @@ def hello():
 
 mangum_handler = Mangum(app, lifespan="off")
 
-@cors_headers
+@cors_headers(origin=SETTINGS.FRONTEND_URL, credentials=True)
 def handler(event, context):
     return mangum_handler(event, context)
