@@ -10,6 +10,7 @@ import App from "./App.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import LoginPage from "./pages/Login.tsx";
 import EventRegistrationPage from "./pages/EventRegistration.tsx";
+import Layout from "./components/Layout.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -32,10 +33,16 @@ createRoot(document.getElementById("root")!).render(
             path="/admin"
             element={
               <ProtectRoute accessBy="authenticated">
-                <App />
+                <Layout />
               </ProtectRoute>
             }
-          />
+          >
+            {/* Insert Appropriate Pages Here */}
+            <Route path="scan" element={<EventRegistrationPage />} />
+            <Route path="participants" element={<App />} />
+            <Route path="register" element={<App />} />
+            <Route path="logout" element={<App />} />
+          </Route>
 
           {/* Not Found Route */}
           <Route path="*" element={<NotFound />} />
