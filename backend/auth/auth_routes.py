@@ -1,4 +1,3 @@
-from urllib.parse import urljoin
 from .supabase import supabase
 from fastapi import APIRouter, HTTPException, Request, Response
 from fastapi.responses import RedirectResponse, JSONResponse

@@ -1,0 +1,70 @@
+service: sari-sari-backend
+frameworkVersion: "4"
+
+custom:
+  stage: ${opt:stage, 'development'}
+  pythonRequirements:
+    fileName: requirements.txt
+    dockerizePip: linux
+    no-deploy:
+      - requests
+      - boto3
+      - botocore
+    layer:
+      name: sari-sari-backend-${self:custom.stage}-python-requirements
+      compatibleRuntimes:
+        - python3.10
+    useDownloadCache: false
+    useStaticCache: false
+    slim: true
+    slimPatternsAppendDefaults: false
+    slimPatterns:
+      - "/*.py[c|o]"
+      - "/pycache*"
+
+provider:
+  name: aws
+  runtime: python3.10
+  region: ap-southeast-1
+  profile: sari-sari-backend
+  timeout: 30
+  environment:
+    ENV: ${self:custom.stage}
+    SUPABASE_URL: ${env:SUPABASE_URL}
+    SUPABASE_ANON_KEY: ${env:SUPABASE_ANON_KEY}
+    DATABASE_CONNECTION_STRING: ${env:DATABASE_CONNECTION_STRING}
+    LOGIN_CALLBACK_URL: ${env:LOGIN_CALLBACK_URL}
+
+functions:
+  app:
+    name: ${self:service}-${self:custom.stage}-app
+    handler: main.handler
+    layers:
+      - Ref: PythonRequirementsLambdaLayer
+    events:
+      - http:
+          path: /{proxy+}
+          method: any
+          cors: true
+
+package:
+  individually: false
+  include:
+    - main.py
+    - auth/**
+    - database/**
+    - middlewares/**
+    - models/**
+    - routes/**
+    - utils/**
+    - requirements.txt
+  exclude:
+    - "**/__pycache__/**"
+    - .venv/**
+    - node_modules/**
+    - uv.lock
+    - "*.pyc"
+    - .DS_Store
+
+plugins:
+  - serverless-python-requirements

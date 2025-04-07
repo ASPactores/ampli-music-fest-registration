@@ -3,11 +3,14 @@ from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 from auth.supabase import supabase
 
+from fnmatch import fnmatch
+
 exclude_path = [
-    "/docs",
-    "/api/v1/auth",
-    "/api/v1/openapi.json",
-    "/api/v1/"
+    "*/docs",
+    "*/openapi.json",
+    "*/auth*",
+    "*/openapi.json*",
+    "*/"
 ]
 
 class AuthMiddleware(BaseHTTPMiddleware):
@@ -16,7 +19,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
         Middleware to check if the user is authenticated
         """
         try:
-            if request.url.path.startswith(tuple(exclude_path)) or request.url.path == "/":
+            if any(fnmatch(request.url.path, pattern) for pattern in exclude_path) or request.url.path == "/":
                 return await call_next(request)
 
 
