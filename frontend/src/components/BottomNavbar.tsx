@@ -18,7 +18,7 @@ const NavItem = ({ icon, label, href, isActive, onClick }: NavItemProps) => {
       to={href}
       onClick={onClick}
       className={cn(
-        "flex flex-col items-center justify-center px-4 py-2 transition-colors",
+        "flex flex-col items-center justify-center px-2 sm:px-4 py-2 transition-colors",
         isActive
           ? "text-primary"
           : "text-muted-foreground hover:text-foreground"
@@ -26,14 +26,17 @@ const NavItem = ({ icon, label, href, isActive, onClick }: NavItemProps) => {
     >
       <div
         className={cn(
-          "mb-1 p-2 rounded-full transition-colors",
+          "p-2 rounded-full transition-colors",
           isActive ? "bg-primary/10" : ""
         )}
       >
         {icon}
       </div>
       <span
-        className={cn("text-xs font-medium", isActive ? "font-semibold" : "")}
+        className={cn(
+          "text-xs font-medium hidden sm:block", 
+          isActive ? "font-semibold" : ""
+        )}
       >
         {label}
       </span>
@@ -47,22 +50,22 @@ export function BottomNavbar() {
 
   const navItems = [
     {
-      icon: <QrCode className="h-6 w-6" />,
+      icon: <QrCode className="h-5 w-5 sm:h-6 sm:w-6" />,
       label: "Scan",
       href: "/admin/scan",
     },
     {
-      icon: <FileText className="h-6 w-6" />,
+      icon: <FileText className="h-5 w-5 sm:h-6 sm:w-6" />,
       label: "Participants",
       href: "/admin/participants",
     },
     {
-      icon: <User className="h-6 w-6" />,
+      icon: <User className="h-5 w-5 sm:h-6 sm:w-6" />,
       label: "Register",
       href: "/admin/register",
     },
     {
-      icon: <LogOut className="h-6 w-6" />,
+      icon: <LogOut className="h-5 w-5 sm:h-6 sm:w-6" />,
       label: "Sign Out",
       href: "/logout",
     },
@@ -78,8 +81,8 @@ export function BottomNavbar() {
   }, [location.pathname, navItems]);
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 flex justify-center p-4">
-      <div className="flex items-center justify-between space-x-4 rounded-[32px] border bg-background px-6 py-1 shadow-sm">
+    <div className="fixed bottom-0 left-0 right-0 z-50 flex justify-center p-2 sm:p-4">
+      <div className="flex items-center justify-between space-x-8 sm:space-x-6 rounded-[20px] border bg-background px-6 sm:px-6 py-1 shadow-sm">
         {navItems.map((item, index) => (
           <NavItem
             key={item.label}
