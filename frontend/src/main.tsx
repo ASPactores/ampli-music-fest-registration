@@ -14,6 +14,7 @@ import LoginPage from "./pages/Login.tsx";
 import EventRegistrationPage from "./pages/EventRegistration.tsx";
 import QRCodeReader from "./pages/QRCodeReader.tsx";
 import Layout from "./components/Layout.tsx";
+import ParticipantDetails from "./pages/ParticipantDetails.tsx";
 
 const queryClient = new QueryClient();
 
