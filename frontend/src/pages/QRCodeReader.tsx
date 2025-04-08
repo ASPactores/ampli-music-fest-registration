@@ -1,14 +1,25 @@
 import { useState, useEffect, useRef } from "react";
 import { Scanner } from "@yudiel/react-qr-scanner";
 import { BottomNavbar } from "@/components/BottomNavbar";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { toast, Toaster } from "sonner";
 
 const QRCodeReader = () => {
   const [scanned, setScanned] = useState(false);
   const [attendee_id, setAttendeeId] = useState<string | null>(null); // Now holds full raw QR string
   const [cameraError, setCameraError] = useState<string | null>(null);
   const toastShownRef = useRef(false);
+
+  // Check for login success toast flag when component mounts
+  useEffect(() => {
+    // Check if we should show login success toast
+    const showLoginSuccessToast = sessionStorage.getItem("showLoginSuccessToast");
+    if (showLoginSuccessToast === "true") {
+      // Show the toast
+      toast.success("Login successful!");
+      // Remove the flag so it doesn't show again on refresh
+      sessionStorage.removeItem("showLoginSuccessToast");
+    }
+  }, []);
 
   // Show hint toast if no QR is detected
   useEffect(() => {
@@ -25,6 +36,8 @@ const QRCodeReader = () => {
 
     return () => clearTimeout(timeout);
   }, [scanned, cameraError]);
+
+  // ...rest of the component remains the same
 
   const handleScan = (e: any) => {
     if (scanned || !e?.[0]?.rawValue) return;
@@ -74,66 +87,57 @@ const QRCodeReader = () => {
   }, [scanned, attendee_id]);
 
   return (
-    <div className="flex flex-col items-center min-h-screen p-4 bg-white gap-4">
-      <img
-        src="/sarisari2025logo.png"
-        alt="Logo"
-        className="w-8 h-6 lg:w-10 lg:h-8 mb-4"
-      />
-      <h2 className="font-inter text-2xl lg:text-3xl font-bold text-center mt-8 mb-8">
-        Place QR inside the box
-      </h2>
-      {cameraError ? (
-        <div className="w-56 h-56 lg:w-72 lg:h-72 border-2 border-red-500 rounded-lg flex items-center justify-center bg-gray-100">
-          <p className="text-red-500 text-center p-4">
-            Camera access error. Please check your permissions and refresh the
-            page.
-          </p>
+    <>
+      <Toaster position="top-center" richColors expand={true} duration={3000} />
+      <div className="flex flex-col items-center min-h-screen p-4 bg-white gap-4">
+        <img
+          src="/sarisari2025logo.png"
+          alt="Logo"
+          className="w-8 h-6 lg:w-10 lg:h-8 mb-4"
+        />
+        <h2 className="font-inter text-2xl lg:text-3xl font-bold text-center mt-8 mb-8">
+          Place QR inside the box
+        </h2>
+        {cameraError ? (
+          <div className="w-56 h-56 lg:w-72 lg:h-72 border-2 border-red-500 rounded-lg flex items-center justify-center bg-gray-100">
+            <p className="text-red-500 text-center p-4">
+              Camera access error. Please check your permissions and refresh the
+              page.
+            </p>
+          </div>
+        ) : (
+          <div className="w-56 h-56 lg:w-72 lg:h-72 border-2 border-black rounded-lg overflow-hidden relative">
+            <Scanner
+              onScan={handleScan}
+              onError={handleCameraError}
+              constraints={{
+                facingMode: "environment",
+                width: { ideal: 1280 },
+                height: { ideal: 1280 },
+              }}
+            />
+          </div>
+        )}
+        {/* User ID Message Container */}
+        {attendee_id ? (
+          <div className="mt-4 p-2 bg-green-100 text-green-800 rounded-md w-full max-w-md text-center">
+            Attendee ID: <br /> {attendee_id}
+          </div>
+        ) : null}
+        {/* Separate Button - Will always be visible */}
+        <div className="fixed bottom-36 w-full flex justify-center">
+          <button
+            className="font-inter px-5 py-3 bg-black text-white rounded-md w-10/12 md:w-1/3 lg:w-1/4 cursor-pointer"
+            onClick={scanned ? handleConfirm : handleReset}
+            type="button"
+          >
+            {scanned ? "Confirm" : "Reset"}
+          </button>
         </div>
-      ) : (
-        <div className="w-56 h-56 lg:w-72 lg:h-72 border-2 border-black rounded-lg overflow-hidden relative">
-          <Scanner
-            onScan={handleScan}
-            onError={handleCameraError}
-            constraints={{
-              facingMode: "environment",
-              width: { ideal: 1280 },
-              height: { ideal: 1280 },
-            }}
-          />
-        </div>
-      )}
-      {/* User ID Message Container */}
-      {attendee_id ? (
-        <div className="mt-4 p-2 bg-green-100 text-green-800 rounded-md w-full max-w-md text-center">
-          Attendee ID: <br /> {attendee_id}
-        </div>
-      ) : null}
-      {/* Separate Button - Will always be visible */}
-      <div className="fixed bottom-36 w-full flex justify-center">
-        <button
-          className="font-inter px-5 py-3 bg-black text-white rounded-md w-10/12 md:w-1/3 lg:w-1/4 cursor-pointer"
-          onClick={scanned ? handleConfirm : handleReset}
-          type="button"
-        >
-          {scanned ? "Confirm" : "Reset"}
-        </button>
+        <div className="mt-16"></div> {/* Spacer */}
+        <BottomNavbar />
       </div>
-      <div className="mt-16"></div> {/* Spacer */}
-      <BottomNavbar />
-      <ToastContainer
-        position="top-center"
-        autoClose={2000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="light"
-      />
-    </div>
+    </>
   );
 };
 
