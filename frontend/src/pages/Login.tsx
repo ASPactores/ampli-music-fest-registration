@@ -1,4 +1,5 @@
-import { useLogin } from "@/hooks/useLogin";
+// import { useLogin } from "@/hooks/useLogin";
+import { useApiPost } from "@/hooks/useApi";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,6 +14,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useCookies } from "react-cookie";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email"),
@@ -23,6 +25,7 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const [, setCookie] = useCookies(["access_token", "refresh_token", "uid"]);
 
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -32,12 +35,28 @@ export default function LoginPage() {
     },
   });
 
-  const { mutate: login, isPending, isError, error } = useLogin();
+  const {
+    mutate: login,
+    isPending,
+    isError,
+    error,
+  } = useApiPost("/auth/login", true);
 
   const onSubmit = (data: LoginFormData) => {
     login(data, {
-      onSuccess: () => {
-        console.log("Login successful", data);
+      onSuccess: (response) => {
+        const { access_token, refresh_token, uid } = response;
+
+        setCookie("access_token", access_token, {
+          path: "/",
+          expires: new Date(Date.now() + 3600 * 1000),
+        });
+        setCookie("refresh_token", refresh_token, { path: "/" });
+        setCookie("uid", uid, {
+          path: "/",
+          expires: new Date(Date.now() + 3600 * 1000),
+        });
+
         navigate("/admin/scan");
       },
       onError: (err) => {
