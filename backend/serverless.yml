@@ -51,7 +51,7 @@ functions:
           path: /{proxy+}
           method: any
           cors:
-            origin: "http://localhost:5173"
+            origin: "http://localhost:5173,https://ampli-music-fest-registration-git-develop-aspactores-projects.vercel.app/"
             headers:
               - Content-Type
               - X-Amz-Date
@@ -65,13 +65,6 @@ functions:
               - Referer
               - User-Agent
             allowCredentials: true
-            allowMethods:
-              - GET
-              - POST
-              - PUT
-              - DELETE
-              - OPTIONS
-              - PATCH
 
 package:
   individually: false

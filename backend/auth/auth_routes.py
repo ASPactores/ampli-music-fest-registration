@@ -1,11 +1,21 @@
 from .supabase import supabase
-from fastapi import APIRouter, HTTPException, Request, Response
-from fastapi.responses import RedirectResponse, JSONResponse
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 class LoginRequest(BaseModel):
     email: str
     password: str
+    
+class LoginResponse(BaseModel):
+    access_token: str
+    refresh_token: str
+    uid: str
+
+class RefreshTokenRequest(BaseModel):
+    refresh_token: str
+
+class MessageResponse(BaseModel):
+    message: str
 
 router = APIRouter(
     prefix="/auth",
@@ -14,9 +24,10 @@ router = APIRouter(
 
 @router.post(
     "/login",
-    response_class=RedirectResponse,
+    response_model=LoginResponse,
+    status_code=200,
 )
-def login(request: Request, response: Response, credentials: LoginRequest):
+async def login(credentials: LoginRequest):
     """
     Login to the application
     """
@@ -24,67 +35,55 @@ def login(request: Request, response: Response, credentials: LoginRequest):
         auth_response = supabase.auth.sign_in_with_password(
             {"email": credentials.email, "password": credentials.password}
         )
-        if auth_response.user is None:
-            raise HTTPException(status_code=400, detail="Login Failed")
-
-        access_token = auth_response.session.access_token
-        refresh_token = auth_response.session.refresh_token
-        uid = auth_response.user.id
         
-        response = JSONResponse(
-            content={"message": "Login successful"},
-            status_code=200,
+        if auth_response.user is None:
+            raise HTTPException(status_code=401, detail="Invalid credentials")
+        
+        return LoginResponse(
+            access_token=auth_response.session.access_token,
+            refresh_token=auth_response.session.refresh_token,
+            uid=auth_response.user.id
         )
-        response.set_cookie(
-            key="access_token",
-            value=access_token,
-            expires=auth_response.session.expires_in,
-            httponly=True,
-            secure=True,
-            samesite="none",
-            path="/",
-        )
-        response.set_cookie(
-            key="refresh_token",
-            value=refresh_token,
-            httponly=True,
-            secure=True,
-            samesite="none",
-            path="/",
-        )
-        response.set_cookie(
-            key="uid",
-            value=uid,
-            httponly=False,
-            expires=auth_response.session.expires_in,
-            secure=True,
-            samesite="none",
-            path="/",
-        )
-
-        return response
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        print(f"Login error: {str(e)}")  # Consider using proper logging
+        raise HTTPException(status_code=401, detail="Authentication failed")
 
-@router.get(
-    "/logout",
-    response_class=RedirectResponse,
+@router.post(
+    "/refresh",
+    response_model=LoginResponse,
+    status_code=200,
 )
-def logout(response: Response, request: Request):
+async def refresh_token(request: RefreshTokenRequest):
+    """
+    Refresh the access token
+    """
     try:
-        access_token = request.cookies.get("access_token")
-        refresh_token = request.cookies.get("refresh_token")
-        if access_token is None or refresh_token is None:
-            raise HTTPException(status_code=400, detail="Not logged in")
-        supabase.auth.sign_out()
-        response = JSONResponse(
-            content={"message": "Logout successful"},
-            status_code=200,
+        auth_response = supabase.auth.refresh_session(request.refresh_token)
+        
+        if auth_response.user is None:
+            raise HTTPException(status_code=400, detail="Invalid refresh token")
+        
+        return LoginResponse(
+            access_token=auth_response.session.access_token,
+            refresh_token=auth_response.session.refresh_token,
+            uid=auth_response.user.id
         )
-        response.delete_cookie(key="access_token")
-        response.delete_cookie(key="refresh_token")
-        response.delete_cookie(key="uid")
-        return response
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
-    
+        print(f"Refresh token error: {str(e)}")  # Consider using proper logging
+        raise HTTPException(status_code=400, detail="Token refresh failed")
+
+@router.post(
+    "/logout",
+    response_model=MessageResponse,
+    status_code=200,
+)
+async def logout():
+    """
+    Logout the current user
+    """
+    try:
+        supabase.auth.sign_out()
+        return MessageResponse(message="Logout successful")
+    except Exception as e:
+        print(f"Logout error: {str(e)}")  # Consider using proper logging
+        raise HTTPException(status_code=400, detail="Logout failed")

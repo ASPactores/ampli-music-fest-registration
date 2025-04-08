@@ -35,7 +35,7 @@ const NavItem = ({ icon, label, href, isActive, onClick }: NavItemProps) => {
       </div>
       <span
         className={cn(
-          "text-xs font-medium hidden sm:block", 
+          "text-xs font-medium hidden sm:block",
           isActive ? "font-semibold" : ""
         )}
       >
@@ -49,33 +49,35 @@ export function BottomNavbar() {
   const [activeIndex, setActiveIndex] = useState(0);
   const location = useLocation();
   const navigate = useNavigate();
-
-  const handleLogout = () => {
-    useLogout(); // Call the logout hook
-    navigate("/login"); // Redirect to the login page
-  };
+  const { handleLogout } = useLogout();
 
   const navItems = [
     {
       icon: <QrCode className="h-5 w-5 sm:h-6 sm:w-6" />,
       label: "Scan",
       href: "/admin/scan",
+      onClick: () => setActiveIndex(0),
     },
     {
       icon: <FileText className="h-5 w-5 sm:h-6 sm:w-6" />,
       label: "Participants",
       href: "/admin/participants",
+      onClick: () => setActiveIndex(1),
     },
     {
       icon: <User className="h-5 w-5 sm:h-6 sm:w-6" />,
       label: "Register",
       href: "/admin/register",
+      onClick: () => setActiveIndex(2),
     },
     {
       icon: <LogOut className="h-5 w-5 sm:h-6 sm:w-6" />,
       label: "Sign Out",
-      href: "#", // Prevent navigation since logout is handled manually
-      onClick: handleLogout,
+      href: "#",
+      onClick: () => {
+        handleLogout(); // clear cookies, etc.
+        navigate("/login"); // redirect
+      },
     },
   ];
 
@@ -86,7 +88,7 @@ export function BottomNavbar() {
     if (index !== -1) {
       setActiveIndex(index);
     }
-  }, [location.pathname, navItems]);
+  }, [location.pathname]);
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 flex justify-center p-2 sm:p-4">
@@ -98,9 +100,7 @@ export function BottomNavbar() {
             label={item.label}
             href={item.href}
             isActive={activeIndex === index}
-            onClick={() =>
-              item.label === "Sign Out" ? handleLogout() : setActiveIndex(index)
-            }
+            onClick={item.onClick}
           />
         ))}
       </div>
