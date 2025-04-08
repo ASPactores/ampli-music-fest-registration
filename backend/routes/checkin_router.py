@@ -8,6 +8,7 @@ from models.model import AttendeeDetails
 from models.schema import PaginatedAttendeesResponse, CheckedInAttendeeResponse
 from utils.pagination import create_pagination_metadata
 from utils.format_attendee import format_attendees
+from middlewares.validate_token import validate_token
 
 # Router setup
 router = APIRouter(
@@ -15,13 +16,13 @@ router = APIRouter(
     tags=["attendees"],
 )
 
-
 @router.get(
     "/checked-in",
     response_model=PaginatedAttendeesResponse,
 )
 async def get_checked_in_attendees(
     request: Request,
+    user: Annotated[dict, Depends(validate_token)],
     response: Response,
     db: Annotated[Session, Depends(get_db)],
     page: int = Query(1, ge=1, description="Page number"),
@@ -70,6 +71,7 @@ async def get_checked_in_attendees(
 )
 async def check_in_attendee(
     attendee_id: uuid.UUID,
+    user: Annotated[dict, Depends(validate_token)],
     db: Annotated[Session, Depends(get_db)],
 ):
     """
