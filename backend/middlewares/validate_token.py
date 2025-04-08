@@ -1,58 +1,43 @@
-from fastapi import Request
-from fastapi.responses import RedirectResponse
-from typing import Callable
+from fastapi import HTTPException, status, Security
+from fastapi.security.api_key import APIKeyHeader
 from auth.supabase import supabase
-from urllib.parse import urljoin
 
-async def validate_auth(
-    request: Request,
-    call_next: Callable,
-):
+token_key = APIKeyHeader(name="Authorization")
+
+async def validate_token(auth_key: str = Security(token_key)):
     """
-        Middleware to check if the user is authenticated
+    Dependency to validate the Bearer token using Supabase authentication.
+    Returns the authenticated user if valid, otherwise raises HTTPException.
     """
     try:
-        access_token = request.cookies.get("access_token")
-        refresh_token = request.cookies.get("refresh_token")
-        
-        # Get the base URL from the request
-        base_url = str(request.base_url).rstrip('/')
-        login_url = urljoin(base_url, "/login")
-        
-        if access_token is None or refresh_token is None:
-            return RedirectResponse(url=login_url, status_code=302)
-        
-        try:
-            supabase.auth.get_user(access_token)
-            return await call_next(request)
-        except Exception:
-            # Token is invalid, try to refresh
-            try:
-                new_auth = supabase.auth.refresh_session(refresh_token)
-                if new_auth.session is None:
-                    return RedirectResponse(url=login_url, status_code=302)
-                
-                access_token = new_auth.session.access_token
-                refresh_token = new_auth.session.refresh_token
-                
-                # Create response with the original request
-                response = await call_next(request)
-                
-                # Set new cookies
-                response.set_cookie(
-                    key="access_token",
-                    value=access_token,
-                    httponly=True,
-                    expires=new_auth.session.expires_in,
+        if not auth_key:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Unauthorized: Missing authentication token",
+            )
+
+        if " " in auth_key:
+            scheme, access_token = auth_key.split(" ", 1)
+            if scheme.lower() != "bearer":
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Unauthorized: Invalid authentication scheme",
                 )
-                response.set_cookie(
-                    key="refresh_token",
-                    value=refresh_token,
-                    httponly=True,
-                )
-                
-                return response
-            except Exception:
-                return RedirectResponse(url=login_url, status_code=302)
-    except Exception:
-        return RedirectResponse(url=login_url, status_code=302)
+        else:
+            access_token = auth_key 
+
+        user_response = supabase.auth.get_user(access_token)
+        if not user_response or not user_response.user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Unauthorized: Invalid or expired token",
+            )
+
+        return user_response.user
+
+    except Exception as e:
+        print(f"Token validation error: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Unauthorized: Authentication failed",
+        )
