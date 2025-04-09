@@ -43,7 +43,7 @@ export default function LoginPage() {
     login(data, {
       onSuccess: (response) => {
         const { access_token, refresh_token, uid } = response;
-      
+
         setCookie("access_token", access_token, {
           path: "/",
           expires: new Date(Date.now() + 3600 * 1000),
@@ -53,10 +53,10 @@ export default function LoginPage() {
           path: "/",
           expires: new Date(Date.now() + 3600 * 1000),
         });
-      
+
         // Set a flag in sessionStorage to show toast in the next component
         sessionStorage.setItem("showLoginSuccessToast", "true");
-        
+
         // Navigate immediately
         navigate("/admin/scan");
       },
@@ -96,10 +96,10 @@ export default function LoginPage() {
   return (
     <>
       <Toaster position="top-center" richColors expand={true} duration={3000} />
-      <div className="min-h-screen flex flex-col items-center justify-center px-4 font-inter">
+      <div className="h-dvh flex flex-col items-center justify-center px-4 font-inter">
         <img
           src={sariSariLogo}
-          className="w-12 h-10 mx-auto mb-3"
+          className="w-12 h-10 mx-auto mb-5"
           alt="Sari Sari Logo"
         />
         <div className="w-full max-w-md mx-auto">
@@ -108,7 +108,9 @@ export default function LoginPage() {
               onSubmit={handleFormSubmit}
               className="space-y-6 w-11/12 mx-auto sm:w-full"
             >
-              <h1 className="text-2xl font-bold text-center">Admin Login</h1>
+              <h1 className="font-inter text-2xl lg:text-3xl font-bold text-center">
+                Admin Login
+              </h1>
 
               <FormField
                 control={form.control}
@@ -148,7 +150,7 @@ export default function LoginPage() {
 
               <Button
                 type="submit"
-                className="w-full py-6"
+                className="w-full py-6 mt-10"
                 disabled={isPending}
               >
                 {isPending ? "Logging in..." : "Login"}

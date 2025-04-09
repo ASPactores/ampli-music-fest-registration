@@ -2,6 +2,13 @@ import { useState, useEffect, useRef } from "react";
 import { Scanner } from "@yudiel/react-qr-scanner";
 import { BottomNavbar } from "@/components/BottomNavbar";
 import { toast, Toaster } from "sonner";
+import { useApiPut } from "@/hooks/useApi";
+import { AxiosError } from "axios";
+
+interface ErrorResponse {
+  detail?: string;
+  [key: string]: any;
+}
 
 const QRCodeReader = () => {
   const [scanned, setScanned] = useState(false);
@@ -9,12 +16,33 @@ const QRCodeReader = () => {
   const [cameraError, setCameraError] = useState<string | null>(null);
   const toastShownRef = useRef(false);
 
+  const { mutate: checkIn, isPending } = useApiPut(
+    attendee_id ? `/attendees/${attendee_id}/check-in` : "",
+    true,
+    {
+      onSuccess: (data) => {
+        console.log("Check-in successful:", data);
+        toast.success("Check-in successful!");
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
+      },
+      onError: (err: AxiosError<ErrorResponse>) => {
+        console.error("Check-in error:", err);
+        toast.error(
+          `Check-in failed: ${err.response?.data.detail || "Unknown error"}`
+        );
+      },
+    }
+  );
+
   // Check for login success toast flag when component mounts
   useEffect(() => {
     // Check if we should show login success toast
-    const showLoginSuccessToast = sessionStorage.getItem("showLoginSuccessToast");
+    const showLoginSuccessToast = sessionStorage.getItem(
+      "showLoginSuccessToast"
+    );
     if (showLoginSuccessToast === "true") {
-      // Show the toast
       toast.success("Login successful!");
       // Remove the flag so it doesn't show again on refresh
       sessionStorage.removeItem("showLoginSuccessToast");
@@ -36,8 +64,6 @@ const QRCodeReader = () => {
 
     return () => clearTimeout(timeout);
   }, [scanned, cameraError]);
-
-  // ...rest of the component remains the same
 
   const handleScan = (e: any) => {
     if (scanned || !e?.[0]?.rawValue) return;
@@ -69,32 +95,22 @@ const QRCodeReader = () => {
   };
 
   const handleConfirm = () => {
-    window.location.reload();
+    if (!attendee_id) {
+      toast.error("No attendee ID found.");
+      return;
+    }
+
+    checkIn({});
   };
 
   const handleReset = () => {
     window.location.reload();
   };
 
-  // Debug - log current state
-  useEffect(() => {
-    console.log(
-      "Current state - scanned:",
-      scanned,
-      "attendee_id:",
-      attendee_id
-    );
-  }, [scanned, attendee_id]);
-
   return (
     <>
       <Toaster position="top-center" richColors expand={true} duration={3000} />
-      <div className="flex flex-col items-center min-h-screen p-4 bg-white gap-4">
-        <img
-          src="/sarisari2025logo.png"
-          alt="Logo"
-          className="w-8 h-6 lg:w-10 lg:h-8 mb-4"
-        />
+      <div className="flex flex-col items-center p-4 bg-white gap-4">
         <h2 className="font-inter text-2xl lg:text-3xl font-bold text-center mt-8 mb-8">
           Place QR inside the box
         </h2>
@@ -127,11 +143,12 @@ const QRCodeReader = () => {
         {/* Separate Button - Will always be visible */}
         <div className="fixed bottom-36 w-full flex justify-center">
           <button
-            className="font-inter px-5 py-3 bg-black text-white rounded-md w-10/12 md:w-1/3 lg:w-1/4 cursor-pointer"
+            className="font-inter px-5 py-3 bg-black text-white rounded-md w-10/12 md:w-1/3 lg:w-1/4 cursor-pointer disabled:opacity-50"
             onClick={scanned ? handleConfirm : handleReset}
             type="button"
+            disabled={isPending}
           >
-            {scanned ? "Confirm" : "Reset"}
+            {isPending ? "Checking in..." : scanned ? "Confirm" : "Reset"}
           </button>
         </div>
         <div className="mt-16"></div> {/* Spacer */}

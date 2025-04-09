@@ -14,6 +14,7 @@ import {
   ChevronsLeft,
   ChevronsRight,
 } from "lucide-react";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { useApiGet } from "@/hooks/useApi";
 
 interface Attendee {
@@ -41,7 +42,7 @@ interface PaginatedAttendeesResponse {
 
 export default function CheckedInAttendeesTable() {
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 50;
+  const pageSize = 10;
 
   const {
     data,
@@ -103,45 +104,11 @@ export default function CheckedInAttendeesTable() {
 
   return (
     <div className="px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto space-y-6">
-      <h1 className="text-3xl font-bold">Checked-In Participants</h1>
-
-      <div className="overflow-x-auto rounded-md border">
-        <Table className="min-w-full">
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[180px]">Date-Time Checked-In</TableHead>
-              <TableHead>Full Name</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Phone #</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoading && (
-              <TableRow>
-                <TableCell colSpan={4}>Loading...</TableCell>
-              </TableRow>
-            )}
-            {isError && (
-              <TableRow>
-                <TableCell colSpan={4}>Failed to load data.</TableCell>
-              </TableRow>
-            )}
-            {!isLoading &&
-              !isError &&
-              attendees.map((attendee) => (
-                <TableRow key={attendee.id}>
-                  <TableCell>{formatDate(attendee.checked_in_at)}</TableCell>
-                  <TableCell>{attendee.full_name}</TableCell>
-                  <TableCell>{attendee.email}</TableCell>
-                  <TableCell>{attendee.phone_number || "-"}</TableCell>
-                </TableRow>
-              ))}
-          </TableBody>
-        </Table>
-      </div>
-
+      <h1 className="font-inter text-2xl lg:text-3xl font-bold text-center">
+        Checked-In Participants
+      </h1>
       {pagination && (
-        <div className="flex items-center justify-center space-x-2 py-4">
+        <div className="flex items-center justify-center space-x-2 py-2">
           <Button
             variant="outline"
             size="icon"
@@ -189,6 +156,45 @@ export default function CheckedInAttendeesTable() {
           </Button>
         </div>
       )}
+      <ScrollArea className="h-[calc(60vh-3rem)] w-full">
+        <div className="rounded-md border">
+          <Table className="min-w-full">
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[180px]">
+                  Date-Time Checked-In
+                </TableHead>
+                <TableHead>Full Name</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Phone #</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {isLoading && (
+                <TableRow>
+                  <TableCell colSpan={4}>Loading...</TableCell>
+                </TableRow>
+              )}
+              {isError && (
+                <TableRow>
+                  <TableCell colSpan={4}>Failed to load data.</TableCell>
+                </TableRow>
+              )}
+              {!isLoading &&
+                !isError &&
+                attendees.map((attendee) => (
+                  <TableRow key={attendee.id}>
+                    <TableCell>{formatDate(attendee.checked_in_at)}</TableCell>
+                    <TableCell>{attendee.full_name}</TableCell>
+                    <TableCell>{attendee.email}</TableCell>
+                    <TableCell>{attendee.phone_number || "-"}</TableCell>
+                  </TableRow>
+                ))}
+            </TableBody>
+            <ScrollBar orientation="horizontal" />
+          </Table>
+        </div>
+      </ScrollArea>
     </div>
   );
 }
