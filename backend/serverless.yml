@@ -28,13 +28,17 @@ provider:
   region: ap-southeast-1
   profile: sari-sari-backend
   timeout: 30
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - ssm:GetParameter
+      Resource: arn:aws:ssm:${self:provider.region}:${aws:accountId}:parameter/sari-sari-backend/*
   environment:
     ENV: ${self:custom.stage}
-    SUPABASE_URL: ${env:SUPABASE_URL}
-    SUPABASE_ANON_KEY: ${env:SUPABASE_ANON_KEY}
-    DATABASE_CONNECTION_STRING: ${env:DATABASE_CONNECTION_STRING}
-    LOGIN_CALLBACK_URL: ${env:LOGIN_CALLBACK_URL}
-    FRONTEND_URL: ${env:FRONTEND_URL}
+    SUPABASE_URL: ${ssm:/sari-sari-backend/supabase-url-${self:custom.stage}}
+    SUPABASE_ANON_KEY: ${ssm:/sari-sari-backend/supabase-key-${self:custom.stage}}
+    DATABASE_CONNECTION_STRING: ${ssm:/sari-sari-backend/database-connection-string-${self:custom.stage}}
+    FRONTEND_URL: ${ssm:/sari-sari-backend/frontend-url-${self:custom.stage}}
 
 functions:
   app:
@@ -51,7 +55,7 @@ functions:
           path: /{proxy+}
           method: any
           cors:
-            origin: "http://localhost:5173,https://ampli-music-fest-registration-git-develop-aspactores-projects.vercel.app/"
+            origin: ${ssm:/sari-sari-backend/frontend-url-${self:custom.stage}}
             headers:
               - Content-Type
               - X-Amz-Date
@@ -97,6 +101,7 @@ package:
     - ruff.toml
     - scripts/**
     - resources/**
+    - .env.*
 
 plugins:
   - serverless-python-requirements
