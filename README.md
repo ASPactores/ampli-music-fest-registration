@@ -52,3 +52,11 @@ git clone https://github.com/ASPactores/ampli-music-fest-registration.git
    ```bash
    ENV=development fastapi dev main.py
    ```
+5. Deploy to AWS Lambda
+
+   ```bash
+    sls deploy --stage development
+
+    # To delete the deployed service
+    sls remove --stage development
+   ```

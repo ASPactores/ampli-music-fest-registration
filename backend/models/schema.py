@@ -26,7 +26,6 @@ class RegistrationSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 class RegistrationFormSchema(BaseModel):
-    id: uuid.UUID
     full_name: str
     email: str
     phone_number: Optional[str] = None

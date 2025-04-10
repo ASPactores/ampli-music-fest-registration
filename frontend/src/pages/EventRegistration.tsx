@@ -1,9 +1,7 @@
 export default function EventRegistrationPage() {
   return (
     <div>
-      <h1>Event Registration Page</h1>
-      <p>Please fill out the form below to register for the event.</p>
-      {/* Add your registration form here */}
+      <h1 className="text-center">Event Registration</h1>
     </div>
   );
 }
