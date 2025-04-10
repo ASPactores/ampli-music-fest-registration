@@ -8,6 +8,8 @@ from models.model import AttendeeDetails
 from models.schema import PaginatedAttendeesResponse, CheckedInAttendeeResponse
 from utils.pagination import create_pagination_metadata
 from utils.format_attendee import format_attendees
+from middlewares.validate_token import validate_token
+from utils.logger import logger
 
 # Router setup
 router = APIRouter(
@@ -15,13 +17,13 @@ router = APIRouter(
     tags=["attendees"],
 )
 
-
 @router.get(
     "/checked-in",
     response_model=PaginatedAttendeesResponse,
 )
 async def get_checked_in_attendees(
     request: Request,
+    user: Annotated[dict, Depends(validate_token)],
     response: Response,
     db: Annotated[Session, Depends(get_db)],
     page: int = Query(1, ge=1, description="Page number"),
@@ -70,6 +72,7 @@ async def get_checked_in_attendees(
 )
 async def check_in_attendee(
     attendee_id: uuid.UUID,
+    user: Annotated[dict, Depends(validate_token)],
     db: Annotated[Session, Depends(get_db)],
 ):
     """
@@ -81,13 +84,15 @@ async def check_in_attendee(
         ).filter(
             AttendeeDetails.id == attendee_id
         ).first()
-
+        
     # Check if attendee exists
     if not attendee:
+        logger.error(f"Check-in attempt for non-existent attendee: [ID: {attendee_id}] by user {user.email}")
         raise HTTPException(status_code=404, detail="Attendee not found")
 
     # Check if attendee is already checked in
     if attendee.checked_in:
+        logger.info(f"Check-in attempt for already checked-in attendee: [ID: {attendee_id}] by user {user.email}")
         return CheckedInAttendeeResponse(
             id=attendee.id,
             full_name=attendee.full_name,
@@ -102,6 +107,7 @@ async def check_in_attendee(
     attendee.checked_in_at = func.now()
     db.commit()
     db.refresh(attendee)
+    logger.info(f"Checked in attendee: [ID: {attendee_id}] by user {user.email}")
 
     return CheckedInAttendeeResponse(
         id=attendee.id,
