@@ -11,17 +11,19 @@ from routes.attendee_router import router as retrieve_attendee_routes
 from routes.checkin_router import router as checkin_routes
 
 from constants.settings import get_settings
+from utils.logger import logger
 
 SETTINGS = get_settings()
 
 async def lifespan(app: FastAPI):
+    logger.info(f"Starting application in {SETTINGS.STAGE} environment")
     await init_db()
     yield
 
 app = FastAPI(
-    root_path=f"/{SETTINGS.STAGE}",
+    # root_path=f"/{SETTINGS.STAGE}",
     lifespan=lifespan,
-    openapi_url=None,
+    # openapi_url=None,
 )
 
 app.include_router(auth_routes)
