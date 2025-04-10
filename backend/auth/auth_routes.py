@@ -1,6 +1,7 @@
 from .supabase import supabase
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
+from utils.logger import logger
 
 class LoginRequest(BaseModel):
     email: str
@@ -36,9 +37,13 @@ async def login(credentials: LoginRequest):
             {"email": credentials.email, "password": credentials.password}
         )
         
+        logger.info(f"Login attempt for {credentials.email}")
+        
         if auth_response.user is None:
+            logger.error(f"Login failed for {credentials.email}: Invalid credentials")
             raise HTTPException(status_code=401, detail="Invalid credentials")
         
+        logger.info(f"User {credentials.email} logged in successfully")
         return LoginResponse(
             access_token=auth_response.session.access_token,
             refresh_token=auth_response.session.refresh_token,

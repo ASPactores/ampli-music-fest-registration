@@ -143,7 +143,7 @@ const QRCodeReader = () => {
         {/* Separate Button - Will always be visible */}
         <div className="fixed bottom-36 w-full flex justify-center">
           <button
-            className="font-inter px-5 py-3 bg-black text-white rounded-md w-10/12 md:w-1/3 lg:w-1/4 cursor-pointer disabled:opacity-50"
+            className="font-inter px-5 py-3 text-[14px] bg-black text-white rounded-md w-10/12 md:w-1/3 lg:w-1/4 cursor-pointer disabled:opacity-50"
             onClick={scanned ? handleConfirm : handleReset}
             type="button"
             disabled={isPending}

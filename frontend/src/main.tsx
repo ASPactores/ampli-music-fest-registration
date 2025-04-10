@@ -14,6 +14,7 @@ import EventRegistrationPage from "./pages/EventRegistration.tsx";
 import QRCodeReader from "./pages/QRCodeReader.tsx";
 import Layout from "./components/Layout.tsx";
 import CheckedInAttendeesTable from "./pages/CheckedInTable.tsx";
+import CheckInSuccess from "./pages/CheckInSuccess.tsx";
 
 const queryClient = new QueryClient();
 
@@ -32,24 +33,27 @@ createRoot(document.getElementById("root")!).render(
                 </ProtectRoute>
               }
             />
-            <Route path="/" element={<EventRegistrationPage />} />
+            <Route path="/" element={<Layout admin={false} />}>
+              <Route index element={<EventRegistrationPage />} />
+              <Route path="/success" element={<CheckInSuccess />} />
+            </Route>
 
             {/* Private Routes */}
             <Route
               path="/admin"
               element={
                 <ProtectRoute accessBy="authenticated">
-                  <Layout />
+                  <Layout admin={true} />
                 </ProtectRoute>
               }
             >
-              {/* Insert Appropriate Pages Here */}
               <Route path="scan" element={<QRCodeReader />} />
               <Route
                 path="participants"
                 element={<CheckedInAttendeesTable />}
               />
-              <Route path="register" element={<App />} />
+              <Route path="register" element={<EventRegistrationPage />} />
+              <Route path="register/success" element={<CheckInSuccess />} />
               <Route path="logout" element={<App />} />
             </Route>
 

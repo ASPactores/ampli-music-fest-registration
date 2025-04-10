@@ -11,6 +11,7 @@ from models.schema import PaginatedAttendeesResponse
 from utils.pagination import create_pagination_metadata
 from utils.format_attendee import format_attendees
 from middlewares.validate_token import validate_token
+from utils.logger import logger
 
 
 # Router setup
@@ -92,6 +93,7 @@ async def register_attendee(
 
     db.commit()
     db.refresh(attendee)
+    logger.info(f"Successfully registered and checked-in attendee with ID: {attendee.id}")
 
     # Compose response using combined schema
     return RegistrationFormSchema(
