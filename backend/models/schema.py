@@ -13,28 +13,16 @@ class AttendeeSchema(BaseModel):
     
     model_config = ConfigDict(from_attributes=True)
     
-class RegistrationSchema(BaseModel):
-    id: uuid.UUID
-    attendee_id: uuid.UUID
-    up_student: Optional[bool] = None
-    year_degree: Optional[str] = None
-    affiliation: str
-    hear_about_event: Optional[str] = None
-    follow_guidelines: Optional[bool] = None
-    allow_updates: Optional[bool] = None
-    
-    model_config = ConfigDict(from_attributes=True)
-
 class RegistrationFormSchema(BaseModel):
     full_name: str
     email: str
-    phone_number: Optional[str] = None
-    up_student: Optional[bool] = None
+    phone_number: str
+    up_student: bool
     year_degree: Optional[str] = None
-    affiliation: str
-    hear_about_event: Optional[str] = None
-    follow_guidelines: Optional[bool] = None
-    allow_updates: Optional[bool] = None
+    affiliation: Optional[str] = None
+    hear_about_event: str
+    follow_guidelines: bool
+    allow_updates: bool
     
     model_config = ConfigDict(from_attributes=True)
     
@@ -72,10 +60,3 @@ class CheckedInAttendeeResponse(BaseModel):
     status: str
     
     model_config = ConfigDict(from_attributes=True)
-    
-    # @field_validator('id', mode='before')
-    # @classmethod
-    # def validate_uuid(cls, v):
-    #     if isinstance(v, str):
-    #         return uuid.UUID(v)
-    #     return v

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import moment from "moment-timezone";
 import {
   Table,
   TableBody,
@@ -55,16 +56,6 @@ export default function CheckedInAttendeesTable() {
 
   const attendees = data?.attendees ?? [];
   const pagination = data?.pagination;
-
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return "-";
-    const date = new Date(dateString);
-    return (
-      date.toLocaleDateString() +
-      " " +
-      date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-    );
-  };
 
   const handlePageChange = (page: number) => {
     if (pagination && (page < 1 || page > pagination.total_pages)) return;
@@ -184,7 +175,14 @@ export default function CheckedInAttendeesTable() {
                 !isError &&
                 attendees.map((attendee) => (
                   <TableRow key={attendee.id}>
-                    <TableCell>{formatDate(attendee.checked_in_at)}</TableCell>
+                    <TableCell>
+                      {attendee.checked_in_at
+                        ? moment
+                            .utc(attendee.checked_in_at)
+                            .tz("Asia/Manila")
+                            .format("hh:mm A, MMMM D")
+                        : "-"}
+                    </TableCell>
                     <TableCell>{attendee.full_name}</TableCell>
                     <TableCell>{attendee.email}</TableCell>
                     <TableCell>{attendee.phone_number || "-"}</TableCell>
