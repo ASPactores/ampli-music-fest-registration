@@ -35,7 +35,7 @@ const formSchema = z.object({
       "Please select at least one option for how you heard about the event"
     ),
   follow_guidelines: z.boolean(),
-  update: z.boolean(),
+  allow_updates: z.boolean(),
 });
 
 const hear_about_event = [
@@ -93,7 +93,7 @@ export default function EventRegistrationPage() {
         .join(", "), // Join all selected options with commas
     };
 
-    console.log("Form submitted:", submitData);
+    console.log("Submitting data:", submitData);
 
     checkin(submitData, {
       onSuccess: (response) => {
@@ -357,7 +357,7 @@ export default function EventRegistrationPage() {
 
             <FormField
               control={form.control}
-              name="update"
+              name="allow_updates"
               render={({ field }) => (
                 <FormItem className="space-y-3">
                   <FormLabel>
