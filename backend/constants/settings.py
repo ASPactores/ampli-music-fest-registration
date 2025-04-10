@@ -7,7 +7,6 @@ class Settings(BaseSettings):
     SUPABASE_URL: str
     SUPABASE_ANON_KEY: str
     DATABASE_CONNECTION_STRING: str
-    LOGIN_CALLBACK_URL: str
     FRONTEND_URL: str
 
     model_config = SettingsConfigDict(env_file=f".env.{STAGE}" if os.path.exists(f".env.{STAGE}") else ".env")

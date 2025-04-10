@@ -4,6 +4,7 @@ import { BottomNavbar } from "@/components/BottomNavbar";
 import { toast, Toaster } from "sonner";
 import { useApiPut } from "@/hooks/useApi";
 import { AxiosError } from "axios";
+import { useNavigate } from "react-router";
 
 interface ErrorResponse {
   detail?: string;
@@ -15,6 +16,7 @@ const QRCodeReader = () => {
   const [attendee_id, setAttendeeId] = useState<string | null>(null); // Now holds full raw QR string
   const [cameraError, setCameraError] = useState<string | null>(null);
   const toastShownRef = useRef(false);
+  const navigate = useNavigate();
 
   const { mutate: checkIn, isPending } = useApiPut(
     attendee_id ? `/attendees/${attendee_id}/check-in` : "",
@@ -24,7 +26,7 @@ const QRCodeReader = () => {
         console.log("Check-in successful:", data);
         toast.success("Check-in successful!");
         setTimeout(() => {
-          window.location.reload();
+          navigate(0);
         }, 1500);
       },
       onError: (err: AxiosError<ErrorResponse>) => {
@@ -104,7 +106,7 @@ const QRCodeReader = () => {
   };
 
   const handleReset = () => {
-    window.location.reload();
+    navigate(0);
   };
 
   return (
