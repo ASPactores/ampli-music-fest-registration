@@ -191,8 +191,8 @@ export default function CheckedInAttendeesTable() {
                   </TableRow>
                 ))}
             </TableBody>
-            <ScrollBar orientation="horizontal" />
           </Table>
+          <ScrollBar orientation="horizontal" />
         </div>
       </ScrollArea>
     </div>

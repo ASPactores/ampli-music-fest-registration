@@ -1,9 +1,7 @@
-import LoginPage from "./Login";
-
 export default function EventRegistrationPage() {
   return (
     <div>
-      <LoginPage />
+      <h1 className="text-center">Event Registration</h1>
     </div>
   );
 }
