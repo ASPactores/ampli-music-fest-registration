@@ -1,7 +1,6 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
-import { Toaster } from "@/components/ui/sonner";
 import { BrowserRouter, Routes, Route } from "react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
@@ -14,7 +13,8 @@ import LoginPage from "./pages/Login.tsx";
 import EventRegistrationPage from "./pages/EventRegistration.tsx";
 import QRCodeReader from "./pages/QRCodeReader.tsx";
 import Layout from "./components/Layout.tsx";
-import ParticipantDetails from "./pages/ParticipantDetails.tsx";
+import CheckedInAttendeesTable from "./pages/CheckedInTable.tsx";
+import CheckInSuccess from "./pages/CheckInSuccess.tsx";
 
 const queryClient = new QueryClient();
 
@@ -33,21 +33,27 @@ createRoot(document.getElementById("root")!).render(
                 </ProtectRoute>
               }
             />
-            <Route path="/" element={<EventRegistrationPage />} />
+            <Route path="/" element={<Layout admin={false} />}>
+              <Route index element={<EventRegistrationPage />} />
+              <Route path="/success" element={<CheckInSuccess />} />
+            </Route>
 
             {/* Private Routes */}
             <Route
               path="/admin"
               element={
                 <ProtectRoute accessBy="authenticated">
-                  <Layout />
+                  <Layout admin={true} />
                 </ProtectRoute>
               }
             >
-              {/* Insert Appropriate Pages Here */}
               <Route path="scan" element={<QRCodeReader />} />
-              <Route path="participants" element={<App />} />
-              <Route path="register" element={<App />} />
+              <Route
+                path="participants"
+                element={<CheckedInAttendeesTable />}
+              />
+              <Route path="register" element={<EventRegistrationPage />} />
+              <Route path="register/success" element={<CheckInSuccess />} />
               <Route path="logout" element={<App />} />
             </Route>
 
@@ -55,7 +61,6 @@ createRoot(document.getElementById("root")!).render(
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
-        <Toaster />
       </CookiesProvider>
     </QueryClientProvider>
   </StrictMode>

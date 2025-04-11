@@ -6,16 +6,17 @@ from lambda_decorators import cors_headers
 
 from models.model import init_db
 from auth.auth_routes import router as auth_routes
-from middlewares.auth_middleware import AuthMiddleware
 
 from routes.attendee_router import router as retrieve_attendee_routes
 from routes.checkin_router import router as checkin_routes
 
 from constants.settings import get_settings
+from utils.logger import logger
 
 SETTINGS = get_settings()
 
 async def lifespan(app: FastAPI):
+    logger.info(f"Starting application in {SETTINGS.STAGE} environment")
     await init_db()
     yield
 
@@ -25,7 +26,6 @@ app = FastAPI(
     openapi_url=None,
 )
 
-app.add_middleware(AuthMiddleware)
 app.include_router(auth_routes)
 app.include_router(retrieve_attendee_routes)
 app.include_router(checkin_routes)

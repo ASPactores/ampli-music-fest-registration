@@ -10,6 +10,8 @@ from models.schema import RegistrationFormSchema
 from models.schema import PaginatedAttendeesResponse
 from utils.pagination import create_pagination_metadata
 from utils.format_attendee import format_attendees
+from middlewares.validate_token import validate_token
+from utils.logger import logger
 
 
 # Router setup
@@ -24,6 +26,7 @@ router = APIRouter(
 )
 async def get_attendees(
     request: Request,
+    user: Annotated[dict, Depends(validate_token)],
     response: Response,
     db: Annotated[Session, Depends(get_db)],
     page: int = Query(1, ge=1, description="Page number"),
@@ -32,25 +35,13 @@ async def get_attendees(
     """
     Retrieve a paginated list of attendees.
     """
-    # Calculate offset
     offset = (page - 1) * page_size
-    
-    # Get total count
     total_count = db.query(AttendeeDetails).count()
-    
-    # Only retrieve needed records
     attendees = db.query(AttendeeDetails).offset(offset).limit(page_size).all()
-    
-    # Generate pagination metadata
     pagination = create_pagination_metadata(request, total_count, page, page_size, "/attendees")
-    
-    # Add custom header
     response.headers["X-Total-Count"] = str(total_count)
-    
-    # Process attendees
     attendee_list = format_attendees(attendees)
     
-    # Return empty list instead of 404 when no items but valid page
     if not attendees and page == 1:
         return PaginatedAttendeesResponse(attendees=[], pagination=pagination)
     
@@ -82,11 +73,11 @@ async def register_attendee(
         full_name=attendee_data.full_name,
         email=attendee_data.email,
         phone_number=attendee_data.phone_number,
-        checked_in=True,  # Automatically checked in
+        checked_in=True,
         checked_in_at=func.now()
     )
     db.add(attendee)
-    db.flush()  # Get the attendee.id before commit for the FK
+    db.flush()
 
     # Create RegistrationStatistics object
     registration_stats = RegistrationStatistics(
@@ -102,6 +93,7 @@ async def register_attendee(
 
     db.commit()
     db.refresh(attendee)
+    logger.info(f"Successfully registered and checked-in attendee with ID: {attendee.id}")
 
     # Compose response using combined schema
     return RegistrationFormSchema(

@@ -10,11 +10,12 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import sariSariLogo from "@/assets/sari_sari_main_logo.svg";
 import { useCookies } from "react-cookie";
+import { toast, Toaster } from "sonner";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email"),
@@ -33,14 +34,10 @@ export default function LoginPage() {
       email: "",
       password: "",
     },
+    mode: "onSubmit",
   });
 
-  const {
-    mutate: login,
-    isPending,
-    isError,
-    error,
-  } = useApiPost("/auth/login", true);
+  const { mutate: login, isPending } = useApiPost("/auth/login", true);
 
   const onSubmit = (data: LoginFormData) => {
     login(data, {
@@ -57,66 +54,111 @@ export default function LoginPage() {
           expires: new Date(Date.now() + 3600 * 1000),
         });
 
+        // Set a flag in sessionStorage to show toast in the next component
+        sessionStorage.setItem("showLoginSuccessToast", "true");
+
+        // Navigate immediately
         navigate("/admin/scan");
       },
       onError: (err) => {
         console.error("Login failed:", err);
+
+        // Check if the error is related to invalid credentials
+        const errorMessage = (err as any)?.message?.toLowerCase() || "";
+        const errorStatus = (err as any)?.status || (err as any)?.statusCode;
+
+        // Check for common authentication error patterns (401 status or specific error messages)
+        if (
+          errorStatus === 401 ||
+          errorMessage.includes("invalid") ||
+          errorMessage.includes("incorrect") ||
+          errorMessage.includes("wrong") ||
+          errorMessage.includes("not found") ||
+          errorMessage.includes("unauthorized")
+        ) {
+          toast.error("Invalid email or password. Please try again.");
+        } else {
+          toast.error("Something went wrong. Please try again.");
+        }
       },
     });
   };
 
+  const handleFormSubmit = form.handleSubmit(onSubmit, (errors) => {
+    // For form validation errors, use the specific message logic
+    if (errors.email || errors.password) {
+      toast.error("Invalid email or password. Please try again.");
+    } else {
+      toast.error("Something went wrong. Please try again.");
+    }
+  });
+
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
-      <div className="w-full max-w-md">
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <h1 className="text-2xl font-semibold text-center">Login</h1>
+    <>
+      <Toaster position="top-center" richColors expand={true} duration={3000} />
+      <div className="h-dvh flex flex-col items-center justify-center px-4 font-inter">
+        <img
+          src={sariSariLogo}
+          className="w-12 h-10 mx-auto mb-5"
+          alt="Sari Sari Logo"
+        />
+        <div className="w-full max-w-md mx-auto">
+          <Form {...form}>
+            <form
+              onSubmit={handleFormSubmit}
+              className="space-y-6 w-11/12 mx-auto sm:w-full"
+            >
+              <h1 className="font-inter text-2xl lg:text-3xl font-bold text-center">
+                Admin Login
+              </h1>
 
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="email"
-                      placeholder="you@example.com"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="font-bold">Email</FormLabel>
+                    <FormControl className="py-6">
+                      <Input
+                        type="email"
+                        placeholder="you@example.com"
+                        {...field}
+                        className="w-full"
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Password</FormLabel>
-                  <FormControl>
-                    <Input type="password" placeholder="••••••••" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="font-bold">Password</FormLabel>
+                    <FormControl className="py-6">
+                      <Input
+                        type="password"
+                        placeholder="••••••••"
+                        {...field}
+                        className="w-full"
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
 
-            <Button type="submit" className="w-full" disabled={isPending}>
-              {isPending ? "Logging in..." : "Login"}
-            </Button>
-
-            {isError && (
-              <p className="text-red-500 text-sm text-center">
-                Login failed:{" "}
-                {(error as any)?.message || "Something went wrong"}
-              </p>
-            )}
-          </form>
-        </Form>
+              <Button
+                type="submit"
+                className="w-full py-6 mt-10"
+                disabled={isPending}
+              >
+                {isPending ? "Logging in..." : "Login"}
+              </Button>
+            </form>
+          </Form>
+        </div>
       </div>
-    </div>
+    </>
   );
 }

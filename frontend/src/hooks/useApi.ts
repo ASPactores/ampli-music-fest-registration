@@ -177,6 +177,8 @@ export function useApiPut<TData = any, TError = AxiosError>(
   authorized = false,
   mutationOptions?: UseMutationOptions<TData, TError, any>
 ) {
+  const [cookies] = useCookies(["access_token"]);
+
   const performApiRequest = async (data: any) => {
     const config: AxiosRequestConfig = {
       method: "put",
@@ -185,7 +187,6 @@ export function useApiPut<TData = any, TError = AxiosError>(
     };
 
     if (authorized) {
-      const [cookies] = useCookies(["access_token"]);
       if (cookies.access_token) {
         config.headers = {
           Authorization: `Bearer ${cookies.access_token}`,

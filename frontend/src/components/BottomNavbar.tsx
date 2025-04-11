@@ -84,7 +84,9 @@ export function BottomNavbar() {
   // Update active index based on current path
   useEffect(() => {
     const currentPath = location.pathname;
-    const index = navItems.findIndex((item) => item.href === currentPath);
+    const index = navItems.findIndex((item) =>
+      currentPath.startsWith(item.href)
+    );
     if (index !== -1) {
       setActiveIndex(index);
     }
