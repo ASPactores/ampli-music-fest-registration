@@ -25,9 +25,15 @@ const QRCodeReader = () => {
       onSuccess: (data) => {
         console.log("Check-in successful:", data);
         toast.success("Check-in successful!");
-        setTimeout(() => {
-          navigate(0);
-        }, 1500);
+        navigate(`/admin/scan/checked-in/${attendee_id}`, {
+          state: {
+            full_name: data.full_name,
+            up_student: data.up_student,
+            year_degree: data.year_degree,
+            affiliation: data.affiliation,
+            status: data.status,
+          },
+        });
       },
       onError: (err: AxiosError<ErrorResponse>) => {
         console.error("Check-in error:", err);

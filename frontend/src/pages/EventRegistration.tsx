@@ -93,8 +93,6 @@ export default function EventRegistrationPage() {
         .join(", "), // Join all selected options with commas
     };
 
-    console.log("Submitting data:", submitData);
-
     checkin(submitData, {
       onSuccess: (response) => {
         console.log("Registration successful:", response);
