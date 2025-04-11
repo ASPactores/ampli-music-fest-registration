@@ -15,6 +15,7 @@ import QRCodeReader from "./pages/QRCodeReader.tsx";
 import Layout from "./components/Layout.tsx";
 import CheckedInAttendeesTable from "./pages/CheckedInTable.tsx";
 import CheckInSuccess from "./pages/CheckInSuccess.tsx";
+import ParticipantDetails from "./pages/ParticipantDetails.tsx";
 
 const queryClient = new QueryClient();
 
@@ -48,6 +49,10 @@ createRoot(document.getElementById("root")!).render(
               }
             >
               <Route path="scan" element={<QRCodeReader />} />
+              <Route
+                path="scan/checked-in/:id"
+                element={<ParticipantDetails />}
+              />
               <Route
                 path="participants"
                 element={<CheckedInAttendeesTable />}
