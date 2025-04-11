@@ -27,7 +27,7 @@ const formSchema = z.object({
   affiliation: z.string().optional(),
   hear_about_event: z.array(z.string()).min(1, "Please select at least one option for how you heard about the event"),
   follow_guidelines: z.boolean(),
-  update: z.boolean(),
+  allow_updates: z.boolean(),
 })
 
 const hear_about_event = [
@@ -322,7 +322,7 @@ export default function EventRegistrationPage() {
 
           <FormField
             control={form.control}
-            name="update"
+            name="allow_updates"
             render={({ field }) => (
               <FormItem className="space-y-3">
                 <FormLabel>Do you allow us to contact you for event updates?</FormLabel>
