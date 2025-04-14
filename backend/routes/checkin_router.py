@@ -11,7 +11,6 @@ from utils.format_attendee import format_attendees
 from middlewares.validate_token import validate_token
 from utils.logger import logger
 
-# Router setup
 router = APIRouter(
     prefix="/attendees",
     tags=["attendees"],
@@ -32,35 +31,25 @@ async def get_checked_in_attendees(
     """
     Retrieve a paginated list of checked-in attendees.
     """
-    # Calculate offset
     offset = (page - 1) * page_size
-    
-    # Get total count
     total_count = db.query(AttendeeDetails).filter(AttendeeDetails.checked_in).count()
     
-    # Query with filter
     checked_in_attendees = (
         db.query(AttendeeDetails)
         .filter(AttendeeDetails.checked_in)
+        .order_by(AttendeeDetails.checked_in_at.desc())
         .offset(offset)
         .limit(page_size)
         .all()
     )
     
-    # Generate pagination metadata
     pagination = create_pagination_metadata(request, total_count, page, page_size, "/attendees/checked-in")
-    
-    # Add custom header
     response.headers["X-Total-Count"] = str(total_count)
-    
-    # Process attendees
     attendee_list = format_attendees(checked_in_attendees)
     
-    # Return empty list instead of 404 when no items but valid page
     if not checked_in_attendees and page == 1:
         return PaginatedAttendeesResponse(attendees=[], pagination=pagination)
     
-    # Check if requested page is beyond available pages
     if page > pagination.total_pages and pagination.total_pages > 0:
         raise HTTPException(status_code=404, detail=f"Page {page} not found. Total pages: {pagination.total_pages}")
     
@@ -78,19 +67,16 @@ async def check_in_attendee(
     """
     Check in an attendee by ID.
     """
-    # Fetch attendee
     attendee = db.query(AttendeeDetails).options(
             joinedload(AttendeeDetails.registration_statistics)
         ).filter(
             AttendeeDetails.id == attendee_id
         ).first()
         
-    # Check if attendee exists
     if not attendee:
         logger.error(f"Check-in attempt for non-existent attendee: [ID: {attendee_id}] by user {user.email}")
         raise HTTPException(status_code=404, detail="Attendee not found")
 
-    # Check if attendee is already checked in
     if attendee.checked_in:
         logger.info(f"Check-in attempt for already checked-in attendee: [ID: {attendee_id}] by user {user.email}")
         return CheckedInAttendeeResponse(
@@ -102,7 +88,6 @@ async def check_in_attendee(
             status="already checked-in"
         )
 
-    # Update checked_in status
     attendee.checked_in = True
     attendee.checked_in_at = func.now()
     db.commit()
