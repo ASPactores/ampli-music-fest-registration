@@ -50,7 +50,7 @@ async def login(credentials: LoginRequest):
             uid=auth_response.user.id
         )
     except Exception as e:
-        print(f"Login error: {str(e)}")  # Consider using proper logging
+        logger.error(f"Login error for {credentials.email}: {str(e)}")
         raise HTTPException(status_code=401, detail="Authentication failed")
 
 @router.post(
@@ -74,7 +74,7 @@ async def refresh_token(request: RefreshTokenRequest):
             uid=auth_response.user.id
         )
     except Exception as e:
-        print(f"Refresh token error: {str(e)}")  # Consider using proper logging
+        logger.error(f"Token refresh error: {str(e)}")
         raise HTTPException(status_code=400, detail="Token refresh failed")
 
 @router.post(
@@ -90,5 +90,5 @@ async def logout():
         supabase.auth.sign_out()
         return MessageResponse(message="Logout successful")
     except Exception as e:
-        print(f"Logout error: {str(e)}")  # Consider using proper logging
+        logger.error(f"Logout error: {str(e)}")
         raise HTTPException(status_code=400, detail="Logout failed")

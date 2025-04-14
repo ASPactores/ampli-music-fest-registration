@@ -2,8 +2,10 @@ from math import ceil
 from fastapi import Request
 from models.schema import PaginationLinks, PaginationMetadata
 
-# Helper function to build pagination links
 def build_pagination_links(base_url: str, path: str, page: int, page_size: int, total_pages: int) -> PaginationLinks:
+    '''
+    Build pagination links for the API response.
+    '''
     has_next = page < total_pages
     has_prev = page > 1
     
@@ -18,13 +20,14 @@ def build_pagination_links(base_url: str, path: str, page: int, page_size: int, 
     )
 
 
-# Helper function to generate pagination metadata
 def create_pagination_metadata(request: Request, total_items: int, page: int, page_size: int, path: str) -> PaginationMetadata:
+    '''
+    Create pagination metadata for the API response.
+    '''
     total_pages = ceil(total_items / page_size) if total_items > 0 else 0
     has_next = page < total_pages
     has_prev = page > 1
     
-    # Build base URL for pagination links
     base_url = f"{request.url.scheme}://{request.url.netloc}"
     links = build_pagination_links(base_url, path, page, page_size, total_pages)
     

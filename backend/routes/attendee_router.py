@@ -14,7 +14,6 @@ from middlewares.validate_token import validate_token
 from utils.logger import logger
 
 
-# Router setup
 router = APIRouter(
     prefix="/attendees",
     tags=["attendees"],
@@ -68,7 +67,6 @@ async def register_attendee(
     if existing_attendee:
         raise HTTPException(status_code=400, detail="Attendee already registered")
 
-    # Create AttendeeDetails object
     attendee = AttendeeDetails(
         full_name=attendee_data.full_name,
         email=attendee_data.email,
@@ -79,7 +77,6 @@ async def register_attendee(
     db.add(attendee)
     db.flush()
 
-    # Create RegistrationStatistics object
     registration_stats = RegistrationStatistics(
         attendee_id=attendee.id,
         up_student=attendee_data.up_student,
@@ -95,7 +92,6 @@ async def register_attendee(
     db.refresh(attendee)
     logger.info(f"Successfully registered and checked-in attendee with ID: {attendee.id}")
 
-    # Compose response using combined schema
     return RegistrationFormSchema(
         id=attendee.id,
         full_name=attendee.full_name,
